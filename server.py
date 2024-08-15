@@ -1,24 +1,26 @@
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import urllib.parse
+from flask import Flask, request, jsonify
+import os
 
-class RequestHandler(BaseHTTPRequestHandler):
-    def do_POST(self):
-        content_length = int(self.headers['Content-Length'])
-        post_data = self.rfile.read(content_length).decode('utf-8')
-        
-        # Parse and print the data (you might want to save it or handle it differently)
-        print(f"Received data: {post_data}")
-        
-        self.send_response(200)
-        self.send_header('Content-type', 'text/plain')
-        self.end_headers()
-        self.wfile.write(b'Data received')
+app = Flask(__name__)
 
-def run(server_class=HTTPServer, handler_class=RequestHandler, port=8000):
-    server_address = ('', port)
-    httpd = server_class(server_address, handler_class)
-    print(f'Starting httpd server on port {port}...')
-    httpd.serve_forever()
+# Directory to save the received sensitive data
+SAVE_FOLDER = 'received_data'
+os.makedirs(SAVE_FOLDER, exist_ok=True)
 
-if __name__ == "__main__":
-    run()
+@app.route('/receive', methods=['POST'])
+def receive_data():
+    # Get the data from the request
+    sensitive_data = request.form.get('data', '')
+
+    if not sensitive_data:
+        return jsonify({'error': 'No data received'}), 400
+
+    # Save the received data to a file
+    file_path = os.path.join(SAVE_FOLDER, 'sensitive_data.txt')
+    with open(file_path, 'w') as file:
+        file.write(sensitive_data)
+
+    return jsonify({'message': 'Data successfully received'}), 200
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8000)
