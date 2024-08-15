@@ -1,3 +1,5 @@
+#This works for mac now
+
 import platform
 import os
 import ctypes
